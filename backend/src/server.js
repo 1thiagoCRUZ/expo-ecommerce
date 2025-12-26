@@ -1,17 +1,23 @@
 import express from "express";
 import path from "path";
-import { ENV } from "../config/env";
+import { clerkMiddleware } from '@clerk/express';
+import { ENV } from "../config/env.js";
+import { connectDB } from "../config/db.js";
 
 const app = express();
 
 const __dirname = path.resolve();
 
+app.use(clerkMiddleware()); // adds auth object under the req => req.auth
+
+
 app.get("/api/health", (req, res) => {
+
     res.status(200).json({ message: "Success" });
 });
 
 // make our app ready for deployment
-if(ENV.NODE_ENV == "prodction") {
+if(ENV.NODE_ENV == "production") {
     app.use(express.static(path.join(__dirname, "../admin/dist")))
 
     app.get("/{*any}", (req, res) => {
@@ -19,4 +25,11 @@ if(ENV.NODE_ENV == "prodction") {
     });
 }
 
-app.listen(ENV.PORT, () => console.log("Server is up and running"));
+const startServer = async () => {
+    await connectDB();
+    app.listen(ENV.PORT, () => {
+        console.log("Server is up and running");
+    });
+};
+
+startServer();
