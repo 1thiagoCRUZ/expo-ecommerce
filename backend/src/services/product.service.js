@@ -37,8 +37,8 @@ export class ProductService {
 
     Object.assign(product, {
       ...data,
-      price: data.price ? Number(data.price) : product.price,
-      stock: data.stock ? Number(data.stock) : product.stock,
+      price: data.price !== undefined && data.price !== null ? Number(data.price) : product.price,
+      stock: data.stock !== undefined && data.stock !== null ? Number(data.stock) : product.stock,
     });
 
     if (files && files.length > 0) {

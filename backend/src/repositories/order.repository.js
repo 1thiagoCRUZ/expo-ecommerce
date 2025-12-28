@@ -9,7 +9,9 @@ export class OrderRepository {
   }
 
   findById(id) {
-    return Order.findById(id);
+    return Order.findById(id)
+      .populate("user", "name email")
+      .populate("orderItems.product");
   }
 
   count() {

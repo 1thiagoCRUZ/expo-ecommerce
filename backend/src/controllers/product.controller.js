@@ -17,8 +17,12 @@ export async function createProduct(req, res) {
 }
 
 export async function getAllProducts(_, res) {
-  const products = await productService.productRepository.findAll();
-  res.json(products);
+  try {
+    const products = await productService.getAll();
+    res.json(products);
+  } catch (err) {
+    res.status(500).json({ message: "Internal server error" });
+  }
 }
 
 export async function updateProduct(req, res) {
