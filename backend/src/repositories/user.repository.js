@@ -8,4 +8,12 @@ export class UserRepository {
   count() {
     return User.countDocuments();
   }
+
+  async save(user) {
+    return user.save();
+  }
+
+  findWishlistByUserId(userId) {
+    return User.findById(userId).populate("wishlist");
+  }
 }
