@@ -8,4 +8,8 @@ export class UserRepository {
   count() {
     return User.countDocuments();
   }
+
+  async save(user) {
+    return user.save();
+  }
 }
