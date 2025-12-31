@@ -16,14 +16,18 @@ export async function addAddress(req, res) {
   try {
     await userService.addAddress(req.user, req.body);
     res.status(201).json({ message: "Address added successfully" });
-  } catch {
+  } catch (err) {
+    if (err.message === "MISSING_REQUIRED_ADDRESS_FIELDS") {
+      return res.status(400).json({ error: "Missing required address fields" });
+    }
     res.status(500).json({ error: "Internal server error" });
   }
+
 }
 
 export async function getAddresses(req, res) {
   try {
-    const addresses = userService.getAddresses(req.user);
+    const addresses = await userService.getAddresses(req.user);
     res.status(200).json({ addresses });
   } catch {
     res.status(500).json({ error: "Internal server error" });
@@ -81,9 +85,13 @@ export async function removeFromWishlist(req, res) {
 
 export async function getWishlist(req, res) {
   try {
-    const wishlist = userService.getWishlist(req.user);
+    const wishlist = await userService.getWishlist(req.user._id);
     res.status(200).json({ wishlist });
-  } catch {
+  } catch (error) {
+    if (error.message === "USER_NOT_FOUND") {
+      return res.status(404).json({ error: "User not found" });
+    }
     res.status(500).json({ error: "Internal server error" });
   }
 }
+

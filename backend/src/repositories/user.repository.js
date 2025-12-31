@@ -12,4 +12,8 @@ export class UserRepository {
   async save(user) {
     return user.save();
   }
+
+  findWishlistByUserId(userId) {
+    return User.findById(userId).populate("wishlist");
+  }
 }
