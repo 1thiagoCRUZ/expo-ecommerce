@@ -4,6 +4,16 @@ export class ProductService {
     this.uploadService = uploadService;
   }
 
+  async getAll() {
+    return this.productRepository.findAll();
+  }
+
+  async getById(id) {
+    const product = await this.productRepository.findById(id);
+    if (!product) throw new Error("Product not found");
+    return product;
+  }
+
   async create(data, files) {
     const { name, description, price, stock, category } = data;
 
@@ -45,7 +55,6 @@ export class ProductService {
       if (files.length > 3) {
         throw new Error("Maximum 3 images allowed");
       }
-
       product.images = await this.uploadService.upload(files);
     }
 

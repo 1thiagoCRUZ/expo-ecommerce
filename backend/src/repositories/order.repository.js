@@ -1,20 +1,30 @@
 import { Order } from "../models/order.model.js";
 
 export class OrderRepository {
-  findAll() {
+  async findAll() {
     return Order.find()
       .populate("user", "name email")
       .populate("orderItems.product")
       .sort({ createdAt: -1 });
   }
 
-  findById(id) {
+  async findById(id) {
     return Order.findById(id)
       .populate("user", "name email")
       .populate("orderItems.product");
   }
 
-  count() {
-    return Order.countDocuments();
+  async findByClerkId(clerkId) {
+    return Order.find({ clerkId })
+      .populate("orderItems.product")
+      .sort({ createdAt: -1 });
+  }
+
+  async create(data) {
+    return Order.create(data);
+  }
+
+  async save(order) {
+    return order.save();
   }
 }
