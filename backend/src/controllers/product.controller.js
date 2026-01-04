@@ -25,6 +25,15 @@ export async function getAllProducts(_, res) {
   }
 }
 
+export async function getProductById(req, res) {
+  try {
+    const product = await productService.getById(req.params.id);
+    res.json(product);
+  } catch (err) {
+    res.status(404).json({ message: err.message });
+  }
+}
+
 export async function updateProduct(req, res) {
   try {
     const product = await productService.update(
@@ -34,6 +43,7 @@ export async function updateProduct(req, res) {
     );
     res.json(product);
   } catch (err) {
-    res.status(400).json({ message: err.message });
+    const status = err.message === "Product not found" ? 404 : 400;
+    res.status(status).json({ message: err.message });
   }
 }

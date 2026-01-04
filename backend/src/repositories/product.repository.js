@@ -17,6 +17,18 @@ export class ProductRepository {
     return product.save();
   }
 
+  async decreaseStock(productId, quantity) {
+    return Product.findByIdAndUpdate(productId, {
+      $inc: { stock: -quantity }
+    });
+  }
+  
+  async increaseStock(productId, quantity) {
+    return Product.findByIdAndUpdate(productId, {
+      $inc: { stock: quantity }
+    });
+  }
+
   count() {
     return Product.countDocuments();
   }
