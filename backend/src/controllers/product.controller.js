@@ -28,9 +28,16 @@ export async function getAllProducts(_, res) {
 export async function getProductById(req, res) {
   try {
     const product = await productService.getById(req.params.id);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
     res.json(product);
   } catch (err) {
-    res.status(404).json({ message: err.message });
+    if (err.message === "Product not found") {
+      return res.status(404).json({ message: err.message });
+    }
+    console.error("Error in getProductById:", err);
+    res.status(500).json({ message: "Internal server error" });
   }
 }
 

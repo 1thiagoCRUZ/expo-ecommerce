@@ -32,32 +32,43 @@ export class OrderService {
       throw new Error("No order items");
     }
 
-    for (const item of orderItems) {
-      const product = await this.productRepository.findById(item.product._id);
-      
-      if (!product) {
-        throw new Error(`Product ${item.name || 'item'} not found`);
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    try {
+      for (const item of orderItems) {
+        const product = await this.productRepository.findById(item.product._id, { session });
+
+        if (!product) {
+          throw new Error(`Product ${item.name || 'item'} not found`);
+        }
+        if (product.stock < item.quantity) {
+          throw new Error(`Insufficient stock for ${product.name}`);
+        }
       }
-      if (product.stock < item.quantity) {
-        throw new Error(`Insufficient stock for ${product.name}`);
+
+
+      const order = await this.orderRepository.create({
+        user: user._id,
+        clerkId: user.clerkId,
+        orderItems,
+        shippingAddress,
+        paymentResult,
+        totalPrice,
+      }, { session });
+
+      for (const item of orderItems) {
+        await this.productRepository.decreaseStock(item.product._id, item.quantity, { session });
       }
+
+      await session.commitTransaction();
+      return order;
+    } catch (error) {
+      await session.abortTransaction();
+      throw error;
+    } finally {
+      session.endSession();
     }
-
-
-    const order = await this.orderRepository.create({
-      user: user._id,
-      clerkId: user.clerkId,
-      orderItems,
-      shippingAddress,
-      paymentResult,
-      totalPrice,
-    });
-
-    for (const item of orderItems) {
-      await this.productRepository.decreaseStock(item.product._id, item.quantity);
-    }
-
-    return order;
   }
 
   async getUserOrders(clerkId) {
@@ -65,12 +76,12 @@ export class OrderService {
 
     const orderIds = orders.map((order) => order._id);
     const reviews = await this.reviewRepository.findByOrderIds(orderIds);
-    
+
     const reviewedOrderIds = new Set(reviews.map((review) => review.orderId.toString()));
 
     return orders.map((order) => ({
-        ...order.toObject(),
-        hasReviewed: reviewedOrderIds.has(order._id.toString()),
+      ...order.toObject(),
+      hasReviewed: reviewedOrderIds.has(order._id.toString()),
     }));
   }
 }
