@@ -31,7 +31,7 @@ export async function getProductById(req, res) {
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
-    res.json(product);
+    res.status(200).json(product);
   } catch (err) {
     if (err.message === "Product not found") {
       return res.status(404).json({ message: err.message });
